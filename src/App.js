@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Container, IconButton } from '@mui/material';
+import { TextField, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Container, IconButton, CircularProgress } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 // import axios from 'axios';
 import './App.css';
@@ -8,8 +8,20 @@ import './App.css';
 function App() {
   const [location, setLocation] = useState('');
   const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true); // Initially set loading to true
+  const [showLoadingSpinner, setShowLoadingSpinner] = useState(true); // Initially set showLoadingSpinner to true
 
- 
+  useEffect(() => {
+    // Start a 50-second timer to hide the loading spinner
+    const timer = setTimeout(() => {
+      setShowLoadingSpinner(false);
+    }, 50000);
+
+    fetchWorkLogs();
+
+    // Cleanup function to clear the timer
+    return () => clearTimeout(timer);
+  }, []);
 
   const fetchWorkLogs = async () => {
     try {
@@ -19,15 +31,16 @@ function App() {
       }
       const data = await response.json();
       setLogs(data);
-      console.log(data);
+      setLoading(false); // Set loading to false when data is fetched
     } catch (error) {
       console.error('Error fetching work logs:', error);
+      setLoading(false); // Set loading to false in case of error
     }
   };
   
- useEffect(() => {
-    fetchWorkLogs();
-  }, []);
+//  useEffect(() => {
+//     fetchWorkLogs();
+//   }, []);
   const handleClockInOut = async () => {
     try {
       if (logs.length % 2 === 0) {
@@ -124,37 +137,45 @@ function App() {
         Clock {logs.length % 2 === 0 ? 'In' : 'Out'}
       </Button>
       <div>
-        {Object.entries(groupLogsByWeek()).map(([weekRange, logs]) => (
-          <div key={weekRange}>
-            <h2>{weekRange}</h2>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Location</TableCell>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Time</TableCell>
-                    <TableCell></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {logs.map((log, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{log.location}</TableCell>
-                      <TableCell>{log.type}</TableCell>
-                      <TableCell>{log.time}</TableCell>
-                      <TableCell>
-                        <IconButton onClick={() => handleDelete(index)} aria-label="delete">
-                          <DeleteIcon />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+        {loading ? ( // Display loading spinner if loading is true
+          <div className="loading-spinner">
+            {showLoadingSpinner && <CircularProgress />} {/* Show the loading spinner if showLoadingSpinner is true */}
+            {showLoadingSpinner && <p>Loading data...</p>} {/* Show loading message if showLoadingSpinner is true */}
+            {!showLoadingSpinner && <p>Data loading is taking longer than expected...</p>} {/* Show message when loading takes more than 50 seconds */}
           </div>
-        ))}
+        ) : (
+          Object.entries(groupLogsByWeek()).map(([weekRange, logs]) => (
+            <div key={weekRange}>
+              <h2>{weekRange}</h2>
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Location</TableCell>
+                      <TableCell>Type</TableCell>
+                      <TableCell>Time</TableCell>
+                      <TableCell></TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {logs.map((log, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{log.location}</TableCell>
+                        <TableCell>{log.type}</TableCell>
+                        <TableCell>{log.time}</TableCell>
+                        <TableCell>
+                          <IconButton onClick={() => handleDelete(index)} aria-label="delete">
+                            <DeleteIcon />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </div>
+          ))
+        )}
       </div>
     </Container>
   );
