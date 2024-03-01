@@ -163,7 +163,7 @@ function App() {
                       <TableRow key={index}>
                         <TableCell>{log.location}</TableCell>
                         <TableCell>{log.type}</TableCell>
-                        <TableCell>{log.time}</TableCell>
+                        <TableCell>{new Date(log.time).toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })}</TableCell>
                         <TableCell>
                           <IconButton onClick={() => handleDelete(index)} aria-label="delete">
                             <DeleteIcon />
