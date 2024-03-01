@@ -56,7 +56,7 @@ function App() {
       }
   
       const type = logs.length % 2 === 0 ? 'Clock In' : 'Clock Out';
-      const time = new Date().toLocaleString();
+      const time = new Date();
       const newLocation = type === 'Clock Out' ? logs[logs.length - 1].location : location;
       const newLog = { location: newLocation, type, time };
   
@@ -109,7 +109,7 @@ function App() {
       weekStart.setHours(0, 0, 0, 0); // Set time to midnight
 
       const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekStart.getDate() + 4); // Friday of the same week
+      weekEnd.setDate(weekStart.getDate() + 5); // Saturday of the same week
       const weekRange = weekStart.toDateString() + '-' + weekEnd.toDateString();
 
       if (!groupedLogs[weekRange]) {
@@ -158,18 +158,32 @@ function App() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {logs.map((log, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{log.location}</TableCell>
-                        <TableCell>{log.type}</TableCell>
-                        <TableCell>{log.time}</TableCell>
-                        <TableCell>
-                          <IconButton onClick={() => handleDelete(index)} aria-label="delete">
-                            <DeleteIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {logs.map((log, index) => {
+                      const dateTimeFormat = new Intl.DateTimeFormat('en-US', {
+                        weekday: 'long', // "Monday"
+                        year: 'numeric', // "2020"
+                        month: 'long', // "July"
+                        day: '2-digit', // "20"
+                        hour: '2-digit', // "12 AM/PM"
+                        minute: '2-digit', // "00"
+                        timeZone: 'America/Los_Angeles',
+                        hour12: true // Use 12-hour format
+                      });
+                      const formattedTime = dateTimeFormat.format(new Date(log.time));
+
+                      return (
+                        <TableRow key={index}>
+                          <TableCell>{log.location}</TableCell>
+                          <TableCell>{log.type}</TableCell>
+                          <TableCell>{formattedTime}</TableCell>
+                          <TableCell>
+                            <IconButton onClick={() => handleDelete(index)} aria-label="delete">
+                              <DeleteIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </TableContainer>
