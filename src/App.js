@@ -3,7 +3,6 @@ import { TextField, Button, Table, TableBody, TableCell, TableContainer, TableHe
 import DeleteIcon from '@mui/icons-material/Delete';
 // import axios from 'axios';
 import './App.css';
-import {format} from 'date-fns'
 
 
 function App() {
@@ -31,7 +30,7 @@ function App() {
         throw new Error('Network response was not ok');
       }
       const data = await response.json();
-      setLogs(data.map(log => ({ ...log, time: format(new Date(log.time), 'MM/dd/yyyy hh:mm:ss a') }))); // Format time using date-fns
+      setLogs(data);
       setLoading(false); // Set loading to false when data is fetched
     } catch (error) {
       console.error('Error fetching work logs:', error);
@@ -163,7 +162,7 @@ function App() {
                       <TableRow key={index}>
                         <TableCell>{log.location}</TableCell>
                         <TableCell>{log.type}</TableCell>
-                        <TableCell>{new Date(log.time).toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })}</TableCell>
+                        <TableCell>{log.time}</TableCell>
                         <TableCell>
                           <IconButton onClick={() => handleDelete(index)} aria-label="delete">
                             <DeleteIcon />
